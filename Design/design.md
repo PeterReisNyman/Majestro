@@ -1,4 +1,4 @@
-# MVP Cortex Lead Flow System Design
+# MVP Majestro Lead Flow System Design
 
 ## 1. Entry Points
 
