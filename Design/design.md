@@ -230,7 +230,7 @@ flowchart TD
     style VR fill:#4CAF50,color:#fff
 ```
 
-![TourAi](../imgs/TourAi.png)
+![TourAi](../imgs/TourAI.png)
 
 ---
 
