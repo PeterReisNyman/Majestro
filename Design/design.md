@@ -1,4 +1,4 @@
-# MVP Cortex Lead Flow System Design
+# MVP Majestro Lead Flow System Design
 
 ## 1. Entry Points
 
@@ -150,8 +150,6 @@ flowchart TD
 ```
 
 ### 2.2 First Contact Lead
-
-we could also decide to primary try to solve this in the MVP, but this part have requierments from the chat bot
 
 ```mermaid
 flowchart TD
