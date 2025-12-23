@@ -200,7 +200,7 @@ flowchart TD
     PROP_DATA[Property Data]
     LEAD_DATA[Lead Data]
 
-    GPT[GPT-5.2]
+    GPT[GPT-5.2 or img blw]
 
     ROTEIRO[Custom Roteiro]
 
@@ -232,22 +232,8 @@ flowchart TD
     style VR fill:#4CAF50,color:#fff
 ```
 
----
-
-# DEMO Insights
-
-Incopradoras wont be our main focus, so we will need to discus.
-
-**some ideas:**
-- Lead → Close conversion rate per realtor
-- Which properties are getting attention vs ignored
-- Realtor activity & follow-up consistency
-- Pipeline health (stuck leads, aging opportunities)
-
+![TourAi](../imgs/TourAi.png)
 
 ---
 
-## UI
-
-[Hubspot](https://www.hubspot.com/)
-[Pipedrive](https://www.pipedrive.com/)
+# Insights
