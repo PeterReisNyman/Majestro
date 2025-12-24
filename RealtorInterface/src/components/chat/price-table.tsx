@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface PaymentOption {
@@ -11,8 +11,8 @@ interface PaymentOption {
 
 interface PriceTableProps {
   totalPrice?: number;
-  minEntrada?: number; // Minimum down payment percentage
-  maxEntrada?: number; // Maximum down payment percentage
+  minEntrada?: number;
+  maxEntrada?: number;
   onOptionSelect?: (option: PaymentOption, entradaPercent: number, entradaValue: number) => void;
 }
 
@@ -33,6 +33,13 @@ export function PriceTable({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+
+  // Motion value for immediate thumb position (0-100 representing thumb position %)
+  const thumbX = useMotionValue(0);
+
+  // Transform thumb position to percentage for the filled bar
+  const filledWidth = useTransform(thumbX, [0, 100], ['0%', '100%']);
 
   // Calculate values based on entrada percentage
   const entradaValue = Math.round((totalPrice * entradaPercent) / 100);
@@ -54,50 +61,65 @@ export function PriceTable({
     return Math.round(remainingValue / installments);
   };
 
-  // Calculate percentage from pointer position
-  const calculatePercent = useCallback((clientX: number) => {
-    if (!sliderRef.current) return entradaPercent;
-
-    const rect = sliderRef.current.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(1, relativeX / rect.width));
-    return Math.round(minEntrada + percentage * (maxEntrada - minEntrada));
-  }, [minEntrada, maxEntrada, entradaPercent]);
-
-  // Handle pointer move while dragging
-  const handlePointerMove = useCallback((e: PointerEvent) => {
-    const newPercent = calculatePercent(e.clientX);
-    setEntradaPercent(Math.max(minEntrada, Math.min(maxEntrada, newPercent)));
-  }, [calculatePercent, minEntrada, maxEntrada]);
-
-  // Handle pointer up - stop dragging
-  const handlePointerUp = useCallback(() => {
-    setIsDragging(false);
-    document.removeEventListener('pointermove', handlePointerMove);
-    document.removeEventListener('pointerup', handlePointerUp);
-  }, [handlePointerMove]);
-
-  // Handle pointer down on thumb - start dragging
-  const handleThumbPointerDown = (e: React.PointerEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', handlePointerUp);
+  // Convert entrada percent to thumb position (0-100)
+  const percentToThumbPos = (percent: number): number => {
+    return ((percent - minEntrada) / (maxEntrada - minEntrada)) * 100;
   };
 
-  // Cleanup listeners on unmount
+  // Initialize thumb position
   useEffect(() => {
-    return () => {
-      document.removeEventListener('pointermove', handlePointerMove);
-      document.removeEventListener('pointerup', handlePointerUp);
-    };
-  }, [handlePointerMove, handlePointerUp]);
+    thumbX.set(percentToThumbPos(entradaPercent));
+  }, []);
 
-  // Handle click on slider track
-  const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging) return;
-    const newPercent = calculatePercent(e.clientX);
-    setEntradaPercent(Math.max(minEntrada, Math.min(maxEntrada, newPercent)));
+  // Setup global pointer event listeners
+  useEffect(() => {
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isDraggingRef.current || !sliderRef.current) return;
+
+      const rect = sliderRef.current.getBoundingClientRect();
+      const relativeX = e.clientX - rect.left;
+      const thumbPos = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
+
+      // Update motion value immediately (no React re-render)
+      thumbX.set(thumbPos);
+
+      // Calculate and update the actual percent for display
+      const newPercent = Math.round(minEntrada + (thumbPos / 100) * (maxEntrada - minEntrada));
+      setEntradaPercent(Math.max(minEntrada, Math.min(maxEntrada, newPercent)));
+    };
+
+    const handlePointerUp = () => {
+      if (!isDraggingRef.current) return;
+      isDraggingRef.current = false;
+      setIsDragging(false);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointerup', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [minEntrada, maxEntrada, thumbX]);
+
+  // Handle pointer down on thumb or track
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
+    setIsDragging(true);
+
+    // Immediately move to clicked position
+    if (sliderRef.current) {
+      const rect = sliderRef.current.getBoundingClientRect();
+      const relativeX = e.clientX - rect.left;
+      const thumbPos = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
+
+      thumbX.set(thumbPos);
+
+      const newPercent = Math.round(minEntrada + (thumbPos / 100) * (maxEntrada - minEntrada));
+      setEntradaPercent(Math.max(minEntrada, Math.min(maxEntrada, newPercent)));
+    }
   };
 
   // Handle option selection
@@ -105,9 +127,6 @@ export function PriceTable({
     setSelectedOption(option.id);
     onOptionSelect?.(option, entradaPercent, entradaValue);
   };
-
-  // Calculate thumb position
-  const thumbPosition = ((entradaPercent - minEntrada) / (maxEntrada - minEntrada)) * 100;
 
   return (
     <motion.div
@@ -154,25 +173,25 @@ export function PriceTable({
         {/* Slider Track */}
         <div
           ref={sliderRef}
-          onClick={handleSliderClick}
-          className="relative h-10 flex items-center cursor-pointer"
+          onPointerDown={handlePointerDown}
+          className="relative h-10 flex items-center cursor-pointer touch-none"
         >
           {/* Background Track */}
           <div className="absolute inset-x-0 h-2 rounded-full bg-gray-200 dark:bg-white/10" />
 
-          {/* Filled Track */}
+          {/* Filled Track - uses motion value directly */}
           <motion.div
             className={cn(
-              "absolute left-0 h-2 rounded-full transition-colors",
+              "absolute left-0 h-2 rounded-full",
               entradaPercent === 100
                 ? "bg-[var(--green-primary-light)] dark:bg-[var(--green-primary-dark)]"
                 : "bg-gradient-to-r from-[var(--orange-primary-light)] to-[var(--orange-secondary)] dark:from-[var(--orange-primary-dark)] dark:to-[var(--orange-secondary)]"
             )}
-            style={{ width: `${thumbPosition}%` }}
+            style={{ width: filledWidth }}
           />
 
           {/* Percentage Markers */}
-          <div className="absolute inset-x-0 flex justify-between px-1">
+          <div className="absolute inset-x-0 flex justify-between px-1 pointer-events-none">
             {[20, 40, 60, 80, 100].map((mark) => (
               <div
                 key={mark}
@@ -186,31 +205,29 @@ export function PriceTable({
             ))}
           </div>
 
-          {/* Draggable Thumb */}
-          <div
-            onPointerDown={handleThumbPointerDown}
+          {/* Draggable Thumb - uses motion value directly */}
+          <motion.div
             className={cn(
               "absolute h-7 w-7 rounded-full cursor-grab active:cursor-grabbing",
               "flex items-center justify-center",
-              "bg-white dark:bg-white shadow-lg",
-              "border-2 transition-all duration-75",
+              "bg-white shadow-lg",
+              "border-2",
               entradaPercent === 100
                 ? "border-[var(--green-primary-light)] dark:border-[var(--green-primary-dark)]"
                 : "border-[var(--orange-primary-light)] dark:border-[var(--orange-primary-dark)]",
               isDragging && "scale-110 shadow-xl"
             )}
             style={{
-              left: `calc(${thumbPosition}% - 14px)`,
-              touchAction: 'none',
+              left: useTransform(thumbX, (v) => `calc(${v}% - 14px)`),
             }}
           >
             <div className={cn(
-              "w-2 h-2 rounded-full transition-colors",
+              "w-2 h-2 rounded-full",
               entradaPercent === 100
                 ? "bg-[var(--green-primary-light)] dark:bg-[var(--green-primary-dark)]"
                 : "bg-[var(--orange-primary-light)] dark:bg-[var(--orange-primary-dark)]"
             )} />
-          </div>
+          </motion.div>
         </div>
 
         {/* Min/Max Labels */}
@@ -294,7 +311,6 @@ export function PriceTable({
           })}
         </div>
       ) : (
-        // 100% Entrada - À Vista
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
