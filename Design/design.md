@@ -86,6 +86,47 @@ flowchart TD
     style ASSIGN fill:#ff9800,color:#000
 ```
 
+### 1.3 Majestro Pixel
+
+```mermaid
+flowchart TD
+
+    %% ===== NODES =====
+
+    PARTNER[Partner Site]
+
+    PIXEL[Majestro Pixel]
+
+    EDGE[Cloudflare Edge]
+
+    API[NestJS API]
+
+    EVENTS[(Events DB)]
+
+    PROFILES[(User Profiles)]
+
+    %% ===== CONNECTIONS =====
+
+    PARTNER -->|Embeds| PIXEL
+
+    PIXEL -->|Sends events| EDGE
+
+    EDGE -->|Forwards| API
+
+    API -->|Raw events| EVENTS
+
+    EVENTS -->|Aggregate| PROFILES
+
+    %% ===== STYLES =====
+
+    style PARTNER fill:#9C27B0,color:#fff
+    style PIXEL fill:#ff9800,color:#000
+    style EDGE fill:#4CAF50,color:#fff
+    style API fill:#ff9800,color:#000
+    style EVENTS fill:#2196F3,color:#fff
+    style PROFILES fill:#2196F3,color:#fff
+```
+
 ---
 
 ## 2. Processing
@@ -235,3 +276,15 @@ flowchart TD
 ---
 
 # Insights
+
+---
+
+## Color Legend
+
+| | Meaning |
+|--|---------|
+| 🟣 | **Input** — Entry points, data sources, user actions |
+| 🟠 | **AI/Processing** — Claude, GPT, NestJS, orchestration logic |
+| 🟢 | **Output/Action** — External services, APIs, final actions |
+| 🔵 | **Storage** — Database |
+| 🔴 | **External Data** — Loupes Database |
