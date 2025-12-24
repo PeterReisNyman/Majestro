@@ -72,9 +72,9 @@ export function RoadmapCard({
 
       {/* Steps Container */}
       <div className="relative space-y-1">
-        {/* Connection Line */}
+        {/* Connection Line - centered on the status circles */}
         <div
-          className="absolute left-[1.35rem] top-6 bottom-6 w-0.5 bg-gradient-to-b from-[var(--green-primary-light)] dark:from-[var(--green-primary-dark)] via-[var(--orange-primary-light)] dark:via-[var(--orange-primary-dark)] to-gray-300 dark:to-white/10"
+          className="absolute left-[calc(0.75rem+1.125rem)] top-6 bottom-6 w-0.5 -translate-x-1/2 bg-gradient-to-b from-[var(--green-primary-light)] dark:from-[var(--green-primary-dark)] via-[var(--orange-primary-light)] dark:via-[var(--orange-primary-dark)] to-gray-300 dark:to-gray-600"
           aria-hidden="true"
         />
 
@@ -124,8 +124,8 @@ export function RoadmapCard({
                       'ring-pulse',
                     ],
                     isUpcoming && [
-                      'border-gray-300 dark:border-white/20',
-                      'bg-gray-100 dark:bg-black/20',
+                      'border-gray-300 dark:border-gray-600',
+                      'bg-gray-100 dark:bg-gray-800',
                     ]
                   )}
                 >
@@ -141,7 +141,7 @@ export function RoadmapCard({
                     />
                   ) : (
                     <Clock
-                      className="h-3.5 w-3.5 text-gray-400 dark:text-white/30"
+                      className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
                       strokeWidth={2}
                     />
                   )}
@@ -156,7 +156,7 @@ export function RoadmapCard({
                           'h-4 w-4 flex-shrink-0',
                           isCompleted && 'text-[var(--green-primary-light)] dark:text-[var(--green-primary-dark)]',
                           isCurrent && 'text-[var(--orange-primary-light)] dark:text-[var(--orange-primary-dark)]',
-                          isUpcoming && 'text-gray-400 dark:text-white/40'
+                          isUpcoming && 'text-gray-400 dark:text-gray-500'
                         )}
                       />
                       <h4
@@ -164,7 +164,7 @@ export function RoadmapCard({
                           'text-sm font-semibold truncate',
                           isCompleted && 'text-[var(--green-primary-light)] dark:text-[var(--green-primary-dark)]',
                           isCurrent && 'text-[var(--text-primary)] dark:text-white',
-                          isUpcoming && 'text-gray-500 dark:text-white/50'
+                          isUpcoming && 'text-gray-500 dark:text-gray-400'
                         )}
                       >
                         {step.title}
@@ -193,7 +193,7 @@ export function RoadmapCard({
                       'text-xs mt-0.5 truncate',
                       isCompleted && 'text-[var(--green-primary-light)]/70 dark:text-[var(--green-primary-dark)]/70',
                       isCurrent && 'text-[var(--text-secondary)] dark:text-white/60',
-                      isUpcoming && 'text-gray-400 dark:text-white/30'
+                      isUpcoming && 'text-gray-400 dark:text-gray-500'
                     )}
                   >
                     {step.description}
@@ -219,7 +219,7 @@ export function RoadmapCard({
                               'flex items-start gap-2 text-xs',
                               isCompleted && 'text-[var(--green-primary-light)]/80 dark:text-[var(--green-primary-dark)]/80',
                               isCurrent && 'text-[var(--text-secondary)] dark:text-white/70',
-                              isUpcoming && 'text-gray-400 dark:text-white/40'
+                              isUpcoming && 'text-gray-400 dark:text-gray-500'
                             )}
                           >
                             <span className="mt-1.5 h-1 w-1 rounded-full bg-current flex-shrink-0" />
