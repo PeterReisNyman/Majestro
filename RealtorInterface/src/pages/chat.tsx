@@ -6,7 +6,7 @@ import { ChatInput } from '@/components/chat/chat-input';
 import { cn, generateId } from '@/lib/utils';
 import {
   Message,
-  RoadmapStep,
+  RoteiroStep,
   PaymentOption,
   DEMO_CONVERSATIONS,
   ChatConversation,
@@ -113,10 +113,10 @@ export default function ChatPage({ isDarkMode, onToggleTheme }: ChatPageProps) {
     setIsTyping(false);
   };
 
-  // Handle roadmap step click
-  const handleStepClick = (step: RoadmapStep) => {
-    toast.success(`${step.titlePt}`, {
-      description: step.descriptionPt,
+  // Handle roteiro step click
+  const handleStepClick = (step: RoteiroStep) => {
+    toast.success(step.title, {
+      description: step.description,
       duration: 3000,
     });
   };
@@ -129,10 +129,13 @@ export default function ChatPage({ isDarkMode, onToggleTheme }: ChatPageProps) {
     });
   };
 
-  // Handle payment option click
-  const handlePaymentClick = (option: PaymentOption) => {
-    toast.success(`${option.methodPt} selecionado`, {
-      description: `Total: ${option.totalAmount} em ${option.installments}x`,
+  // Handle payment option selection
+  const handlePaymentSelect = (option: PaymentOption, entradaPercent: number, entradaValue: number) => {
+    const formatCurrency = (value: number) =>
+      new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(value);
+
+    toast.success(`${option.method} selecionado`, {
+      description: `Entrada: ${entradaPercent}% (${formatCurrency(entradaValue)}) - ${option.installments}x`,
       duration: 3000,
     });
   };
@@ -206,7 +209,7 @@ export default function ChatPage({ isDarkMode, onToggleTheme }: ChatPageProps) {
             )}
             <div>
               <h1 className="text-lg font-semibold text-[var(--text-primary)] dark:text-white">
-                {selectedConversation ? selectedConversation.title : 'Realtor AI'}
+                {selectedConversation ? selectedConversation.title : 'Majestro'}
               </h1>
               <p className="text-xs text-[var(--text-secondary)] dark:text-white/50">
                 {selectedConversation ? 'Conversa ativa' : 'Assistente Imobiliário'}
@@ -346,7 +349,7 @@ export default function ChatPage({ isDarkMode, onToggleTheme }: ChatPageProps) {
                       message={msg}
                       onStepClick={handleStepClick}
                       onVRClick={handleVRClick}
-                      onPaymentClick={handlePaymentClick}
+                      onPaymentSelect={handlePaymentSelect}
                     />
                   ))}
                 </AnimatePresence>

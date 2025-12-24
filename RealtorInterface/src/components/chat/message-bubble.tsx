@@ -1,21 +1,21 @@
 import { motion } from 'framer-motion';
 import { cn, formatTime } from '@/lib/utils';
-import { Message, RoadmapStep, PaymentOption } from '@/lib/types';
+import { Message, RoteiroStep, PaymentOption } from '@/lib/types';
 import { RoadmapCard } from './roadmap-card';
 import { PriceTable } from './price-table';
 
 interface MessageBubbleProps {
   message: Message;
-  onStepClick?: (step: RoadmapStep) => void;
+  onStepClick?: (step: RoteiroStep) => void;
   onVRClick?: () => void;
-  onPaymentClick?: (option: PaymentOption) => void;
+  onPaymentSelect?: (option: PaymentOption, entradaPercent: number, entradaValue: number) => void;
 }
 
 export function MessageBubble({
   message,
   onStepClick,
   onVRClick,
-  onPaymentClick,
+  onPaymentSelect,
 }: MessageBubbleProps) {
   const isUser = message.role === 'user';
 
@@ -54,7 +54,7 @@ export function MessageBubble({
         }}
         className="mb-4 flex w-full justify-start px-4"
       >
-        <PriceTable onOptionClick={onPaymentClick} />
+        <PriceTable onOptionSelect={onPaymentSelect} />
       </motion.div>
     );
   }
